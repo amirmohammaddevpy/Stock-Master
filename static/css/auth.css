@@ -1,0 +1,335 @@
+
+@import url('https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;600;700;800&display=swap');
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Vazirmatn', sans-serif;
+    background: #0b1120;
+    color: #f1f5f9;
+    min-height: 100vh;
+}
+
+.auth-wrapper {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 30px 16px;
+}
+
+.auth-brand {
+    text-align: center;
+    margin-bottom: 28px;
+}
+
+.brand-icon {
+    width: 55px;
+    height: 55px;
+    background: linear-gradient(135deg, #2563eb, #06b6d4);
+    border-radius: 16px;
+    display: grid;
+    place-items: center;
+    margin: 0 auto 12px;
+    font-size: 28px;
+    font-weight: 800;
+    color: white;
+}
+
+.auth-brand h1 {
+    font-size: 25px;
+    font-weight: 800;
+    letter-spacing: -1px;
+}
+
+.auth-brand p {
+    color: #94a3b8;
+    font-size: 13px;
+    margin-top: 6px;
+}
+
+.auth-card {
+    width: 100%;
+    max-width: 430px;
+    background: #151e30;
+    border: 1px solid #263449;
+    border-radius: 18px;
+    padding: 35px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+}
+
+.card-heading {
+    margin-bottom: 28px;
+}
+
+.card-heading h2 {
+    font-size: 22px;
+    margin-bottom: 9px;
+}
+
+.card-heading p {
+    color: #94a3b8;
+    font-size: 13px;
+    line-height: 1.8;
+}
+
+.form-group {
+    margin-bottom: 21px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 9px;
+    font-size: 13px;
+    font-weight: 600;
+    color: #cbd5e1;
+}
+
+.form-group input {
+    width: 100%;
+    height: 48px;
+    background: #0b1120;
+    border: 1px solid #334155;
+    border-radius: 9px;
+    padding: 0 13px;
+    color: white;
+    font-family: inherit;
+    font-size: 14px;
+    outline: none;
+    transition: 0.2s;
+}
+
+.form-group input:focus {
+    border-color: #3b82f6;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.12);
+}
+
+.password-wrapper {
+    position: relative;
+}
+
+.password-wrapper input {
+    padding-left: 65px;
+}
+
+.toggle-password {
+    position: absolute;
+    left: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: none;
+    border: none;
+    color: #38bdf8;
+    cursor: pointer;
+    font-family: inherit;
+    font-size: 12px;
+}
+
+.submit-btn {
+    width: 100%;
+    height: 49px;
+    border: none;
+    border-radius: 9px;
+    background: linear-gradient(135deg, #2563eb, #0891b2);
+    color: white;
+    font-family: inherit;
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: 0.2s;
+    margin-top: 5px;
+}
+
+.submit-btn:hover {
+    filter: brightness(1.15);
+    transform: translateY(-2px);
+}
+
+.auth-footer {
+    margin-top: 25px;
+    text-align: center;
+    font-size: 13px;
+    color: #94a3b8;
+}
+
+.auth-footer a {
+    color: #38bdf8;
+    text-decoration: none;
+    font-weight: 600;
+    margin-right: 4px;
+}
+
+.auth-footer a:hover {
+    color: #7dd3fc;
+}
+
+.auth-bottom {
+    margin-top: 25px;
+    color: #64748b;
+    font-size: 11px;
+    text-align: center;
+}
+
+.error {
+    display: block;
+    color: #f87171;
+    font-size: 11px;
+    margin-top: 7px;
+}
+
+.alert {
+    padding: 12px;
+    border-radius: 8px;
+    margin-bottom: 18px;
+    font-size: 12px;
+    background: #1e293b;
+}
+
+.alert.error,
+.error-alert {
+    background: rgba(239, 68, 68, 0.1);
+    color: #f87171;
+    border: 1px solid rgba(239, 68, 68, 0.2);
+}
+
+.alert.success {
+    background: rgba(34, 197, 94, 0.1);
+    color: #4ade80;
+}
+
+.forgot-password {
+    display: flex;
+    justify-content: flex-start;
+    margin-top: -8px;
+    margin-bottom: 22px;
+}
+
+.forgot-password a {
+    color: #38bdf8;
+    font-size: 12px;
+    font-weight: 500;
+    text-decoration: none;
+    transition: all 0.25s ease;
+}
+
+.forgot-password a:hover {
+    color: #7dd3fc;
+    text-decoration: underline;
+}
+
+
+/* Password Reset Icon */
+
+.reset-icon {
+    width: 64px;
+    height: 64px;
+    margin: 0 auto 22px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    background: rgba(99, 102, 241, 0.12);
+    border: 1px solid rgba(99, 102, 241, 0.25);
+    border-radius: 18px;
+
+    color: #818cf8;
+}
+
+.reset-icon svg {
+    width: 30px;
+    height: 30px;
+}
+
+.auth-card .card-heading {
+    text-align: center;
+    margin-bottom: 28px;
+}
+
+.auth-card .card-heading p {
+    line-height: 2;
+    font-size: 13px;
+    color: #94a3b8;
+}
+
+.auth-card .auth-footer {
+    text-align: center;
+    margin-top: 25px;
+}
+
+/* Password Reset Done */
+
+.success-icon {
+    width: 68px;
+    height: 68px;
+    margin: 0 auto 22px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    color: #34d399;
+    background: rgba(52, 211, 153, 0.1);
+    border: 1px solid rgba(52, 211, 153, 0.25);
+    border-radius: 20px;
+}
+
+.success-icon svg {
+    width: 34px;
+    height: 34px;
+}
+
+.reset-info {
+    display: flex;
+    align-items: flex-start;
+    gap: 13px;
+
+    padding: 16px;
+    margin-bottom: 25px;
+
+    background: rgba(99, 102, 241, 0.08);
+    border: 1px solid rgba(99, 102, 241, 0.18);
+    border-radius: 12px;
+}
+
+.info-icon {
+    font-size: 22px;
+    color: #818cf8;
+}
+
+.reset-info strong {
+    display: block;
+    color: #e2e8f0;
+    font-size: 13px;
+    margin-bottom: 7px;
+}
+
+.reset-info p {
+    color: #94a3b8;
+    font-size: 12px;
+    line-height: 2;
+    margin: 0;
+}
+
+.reset-back-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
+    box-sizing: border-box;
+}
+
+@media (max-width: 480px) {
+    .auth-card {
+        padding: 25px 20px;
+    }
+
+    .card-heading h2 {
+        font-size: 20px;
+    }
+}

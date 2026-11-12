@@ -1,0 +1,147 @@
+
+{% load static %}
+{% load humanize %}
+
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>مدیریت محصولات | StockMaster</title>
+    <link rel="stylesheet" href="{% static 'css/products.css' %}">
+</head>
+
+<body>
+
+<div class="dashboard">
+
+    <aside class="sidebar">
+        <div class="logo">
+            <span>Stock</span>Master
+        </div>
+
+        <nav>
+            <a href="{% url 'home:home' %}">داشبورد</a>
+            <a href="#" class="active">محصولات</a>
+        </nav>
+    </aside>
+
+    <main class="main-content">
+
+        <header class="topbar">
+            <div>
+                <h1>مدیریت محصولات</h1>
+                <p>مدیریت و بررسی تمام کالاهای انبار</p>
+            </div>
+
+            <a href="{% url 'product:product_entry' %}" class="add-btn">
+                + افزودن محصول
+            </a>
+        </header>
+
+        <section class="stats">
+            <div class="stat-card">
+                <span>تعداد کل محصولات</span>
+                <h2>{{ products.count|intcomma }}</h2>
+            </div>
+        </section>
+
+        <section class="products-section">
+
+            <div class="section-header">
+                <div>
+                    <h2>لیست محصولات</h2>
+                    <p>تمام محصولات ثبت‌شده در سیستم</p>
+                </div>
+
+                <input
+                    type="text"
+                    id="searchInput"
+                    placeholder="جست‌وجوی نام محصول..."
+                >
+            </div>
+
+            <div class="table-wrapper">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>نام محصول</th>
+                            <th>کد محصول</th>
+                            <th>دسته‌بندی</th>
+                            <th>موجودی</th>
+                            <th>قیمت خرید</th>
+                            <th>قیمت فروش</th>
+                            <th>وضعیت</th>
+                            <th>تاریخ ثبت</th>
+                        </tr>
+                    </thead>
+
+                    <tbody id="productsTable">
+
+                        {% for product in products %}
+                        <tr>
+                            <td class="product-name">
+                                {{ product.name }}
+                            </td>
+
+                            <td>{{ product.code_product }}</td>
+
+                            <td>{{ product.category.name }}</td>
+
+                            <td>{{ product.quantity|intcomma }}</td>
+
+                            <td>{{ product.buy_price|intcomma }} تومان</td>
+
+                            <td>{{ product.sell_price|intcomma }} تومان</td>
+
+                            <td>
+                                {% if product.is_active %}
+                                    <span class="status active-status">فعال</span>
+                                {% else %}
+                                    <span class="status inactive-status">غیرفعال</span>
+                                {% endif %}
+                            </td>
+
+                            <td>{{ product.created_at|date:"Y/m/d" }}</td>
+                        </tr>
+
+                        {% empty %}
+                        <tr>
+                            <td colspan="8" class="empty">
+                                هنوز محصولی ثبت نشده است.
+                            </td>
+                        </tr>
+                        {% endfor %}
+
+                    </tbody>
+                </table>
+            </div>
+
+        </section>
+
+    </main>
+</div>
+
+<script>
+    const searchInput = document.getElementById("searchInput");
+    const rows = document.querySelectorAll("#productsTable tr");
+
+    searchInput.addEventListener("input", function () {
+        const value = this.value.trim().toLowerCase();
+
+        rows.forEach(row => {
+            const name = row.querySelector(".product-name");
+
+            if (!name) return;
+
+            row.style.display = name.textContent
+                .trim()
+                .toLowerCase()
+                .includes(value) ? "" : "none";
+        });
+    });
+</script>
+
+</body>
+</html>

@@ -1,0 +1,237 @@
+
+{% load static %}
+{% load humanize %}
+
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>گزارش‌ها | StockMaster</title>
+
+    <link rel="stylesheet" href="{% static 'css/reports.css' %}">
+</head>
+
+<body>
+
+<div class="dashboard">
+
+    <!-- Sidebar -->
+    <aside class="sidebar">
+
+        <div class="logo">
+            <span>Stock</span>Master
+        </div>
+
+        <nav>
+            <a href="{% url 'home:home' %}">داشبورد</a>
+            <a href="#" class="active">گزارش‌ها</a>
+        </nav>
+
+    </aside>
+
+
+    <!-- Main -->
+    <main class="main-content">
+
+        <header class="topbar">
+            <div>
+                <h1>گزارش‌های انبار</h1>
+                <p>بررسی وضعیت موجودی و عملکرد فروش</p>
+            </div>
+
+            <div class="report-date">
+                گزارش وضعیت انبار
+            </div>
+        </header>
+
+
+        <!-- Statistics -->
+        <section class="stats-grid">
+
+            <div class="stat-card">
+                <div class="stat-icon blue">📦</div>
+                <div>
+                    <span>تعداد کل محصولات</span>
+                    <h2>{{ total_products|intcomma }}</h2>
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-icon purple">📁</div>
+                <div>
+                    <span>تعداد دسته‌بندی‌ها</span>
+                    <h2>{{ total_categories|intcomma }}</h2>
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-icon green">💰</div>
+                <div>
+                    <span>ارزش موجودی انبار</span>
+                    <h2>{{ total_stock_value|intcomma }}</h2>
+                    <small>تومان</small>
+                </div>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-icon orange">🛒</div>
+                <div>
+                    <span>مجموع فروش</span>
+                    <h2>{{ total_sales|intcomma }}</h2>
+                    <small>تومان</small>
+                </div>
+            </div>
+
+        </section>
+
+
+        <!-- Inventory Status -->
+        <section class="inventory-section">
+
+            <div class="section-title">
+                <h2>وضعیت موجودی انبار</h2>
+                <p>بررسی کالاهای نیازمند تأمین موجودی</p>
+            </div>
+
+            <div class="inventory-grid">
+
+                <div class="inventory-card danger">
+                    <span class="inventory-label">کالاهای ناموجود</span>
+                    <h2>{{ out_of_stock_count|intcomma }}</h2>
+                    <p>محصولاتی با موجودی صفر</p>
+                </div>
+
+                <div class="inventory-card warning">
+                    <span class="inventory-label">کالاهای کم‌موجود</span>
+                    <h2>{{ low_stock_count|intcomma }}</h2>
+                    <p>محصولاتی که موجودی کمی دارند</p>
+                </div>
+
+                <div class="inventory-card success">
+                    <span class="inventory-label">کالاهای دارای موجودی</span>
+                    <h2>{{ available_products_count|intcomma }}</h2>
+                    <p>محصولات دارای موجودی بیشتر از صفر</p>
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- Low Stock Products -->
+        <section class="report-section">
+
+            <div class="section-header">
+                <div>
+                    <h2>محصولات کم‌موجود</h2>
+                    <p>محصولاتی که نیاز به بررسی و تأمین دارند</p>
+                </div>
+            </div>
+
+            <div class="table-wrapper">
+
+                <table>
+                    <thead>
+                        <tr>
+                            <th>نام محصول</th>
+                            <th>کد محصول</th>
+                            <th>دسته‌بندی</th>
+                            <th>موجودی فعلی</th>
+                            <th>وضعیت</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+
+                        {% for product in low_stock_products %}
+
+                        <tr>
+                            <td class="product-name">{{ product.name }}</td>
+                            <td>{{ product.code_product }}</td>
+                            <td>{{ product.category.name }}</td>
+                            <td>{{ product.quantity|intcomma }}</td>
+
+                            <td>
+                                {% if product.quantity == 0 %}
+                                    <span class="status danger-status">ناموجود</span>
+                                {% else %}
+                                    <span class="status warning-status">کم‌موجود</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+
+                        {% empty %}
+
+                        <tr>
+                            <td colspan="5" class="empty">
+                                محصول کم‌موجودی وجود ندارد.
+                            </td>
+                        </tr>
+
+                        {% endfor %}
+
+                    </tbody>
+                </table>
+
+            </div>
+
+        </section>
+
+
+        <!-- Sales Report -->
+        <section class="report-section">
+
+            <div class="section-header">
+                <div>
+                    <h2>گزارش فروش روزانه</h2>
+                    <p>مجموع فروش ثبت‌شده در هر روز</p>
+                </div>
+            </div>
+
+            <div class="table-wrapper">
+
+                <table>
+                    <thead>
+                        <tr>
+                            <th>تاریخ</th>
+                            <th>مجموع فروش</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+
+                        {% for sale in sales_report %}
+
+                        <tr>
+                            <td>{{ sale.created_at|date:"Y/m/d" }}</td>
+                            <td class="sale-amount">
+                                {{ sale.total_price|intcomma }} تومان
+                            </td>
+                        </tr>
+
+                        {% empty %}
+
+                        <tr>
+                            <td colspan="2" class="empty">
+                                هنوز فروشی ثبت نشده است.
+                            </td>
+                        </tr>
+
+                        {% endfor %}
+
+                    </tbody>
+                </table>
+
+            </div>
+
+        </section>
+
+    </main>
+
+</div>
+
+</body>
+</html>

@@ -1,0 +1,647 @@
+
+{% load static %}
+{% load humanize %}
+
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>داشبورد | StockMaster</title>
+
+    <link rel="stylesheet" href="{% static 'css/home.css' %}">
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <style>
+        .chart-panel {
+            background: #1e293b;
+            border: 1px solid #334155;
+            border-radius: 16px;
+            padding: 24px;
+            color: #f8fafc;
+            width: 100%;
+        }
+
+        .panel-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+
+        .panel-header h3 {
+            font-size: 18px;
+            margin-bottom: 7px;
+        }
+
+        .panel-header p {
+            color: #94a3b8;
+            font-size: 13px;
+        }
+
+        .chart-filter select {
+            background: #0f172a;
+            color: #e2e8f0;
+            border: 1px solid #475569;
+            padding: 9px 13px;
+            border-radius: 8px;
+            outline: none;
+            cursor: pointer;
+        }
+
+        .chart-summary {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 25px;
+        }
+
+        .chart-summary span {
+            color: #94a3b8;
+            font-size: 13px;
+        }
+
+        .chart-summary h2 {
+            color: #38bdf8;
+            font-size: 25px;
+            margin-top: 8px;
+        }
+
+        .chart-status {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #4ade80;
+        }
+
+        .chart-container {
+            position: relative;
+            width: 100%;
+            height: 320px;
+        }
+
+        @media(max-width: 600px) {
+            .chart-panel {
+                padding: 16px;
+            }
+
+            .panel-header {
+                align-items: flex-start;
+            }
+
+            .chart-container {
+                height: 250px;
+            }
+
+            .chart-summary h2 {
+                font-size: 20px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="dashboard">
+
+    <!-- Sidebar -->
+    <aside class="sidebar">
+
+        <div class="brand">
+            <div class="brand-icon">S</div>
+            <h2>StockMaster</h2>
+        </div>
+
+        <div class="sidebar-menu">
+
+            <span class="menu-title">منوی اصلی</span>
+
+            <a href="{% url 'home:home' %}" class="menu-item active">
+                <span>▦</span>
+                داشبورد
+            </a>
+
+            <a href="{% url 'product:products' %}" class="menu-item">
+                <span>📦</span>
+                محصولات
+            </a>
+
+            <a href="#" class="menu-item">
+                <span>🛒</span>
+                فروش
+            </a>
+
+            <a href="{% url 'product:product_entry' %}" class="menu-item">
+                <span>📥</span>
+                ورود کالا
+            </a>
+
+            <a href="{% url 'product:sale_product' %}" class="menu-item">
+                <span>📤</span>
+                خروج کالا
+            </a>
+
+            <a href="{% url 'home:reports' %}" class="menu-item">
+                <span>📊</span>
+                گزارش‌ها
+            </a>
+
+            <a href="{% url 'accounts:logout' %}" class="menu-item logout">
+                <span>↪</span>
+                خروج از حساب
+            </a>
+
+        </div>
+
+        <div class="sidebar-footer">
+            <p>StockMaster</p>
+            <small>نسخه 1.0.0</small>
+        </div>
+
+    </aside>
+
+
+    <!-- Main Content -->
+    <main class="main-content">
+
+        <!-- Header -->
+        <header class="topbar">
+
+            <div>
+                <h1>داشبورد</h1>
+                <p>به پنل مدیریت StockMaster خوش آمدید.</p>
+            </div>
+
+            <div class="user-profile">
+
+                <div class="user-avatar">
+                    {{ request.user.username|first|upper }}
+                </div>
+
+                <div class="user-info">
+                    <strong>
+                        {{ request.user.get_full_name|default:request.user.username }}
+                    </strong>
+                    <small>مدیر سیستم</small>
+                </div>
+
+            </div>
+
+        </header>
+
+
+        <!-- Welcome -->
+        <section class="welcome-card">
+
+            <div>
+                <h2>
+                    سلام {{ request.user.first_name|default:request.user.username }} 👋
+                </h2>
+
+                <p>
+                    وضعیت کسب‌وکارت رو از اینجا مدیریت کن.
+                </p>
+            </div>
+
+            <div class="welcome-icon">
+                📦
+            </div>
+
+        </section>
+
+
+        <!-- Statistics -->
+        <section class="stats-grid">
+
+            <div class="stat-card">
+                <div class="stat-icon blue">📦</div>
+                <p>تعداد محصولات</p>
+                <h2>{{ total_products|default:"0" }}</h2>
+                <small>محصول ثبت‌شده در انبار</small>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-icon green">💰</div>
+                <p>مجموع فروش</p>
+                <h2>{{ total_sales|intcomma }}</h2>
+                <small>مجموع فروش ثبت‌شده</small>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-icon orange">⚠️</div>
+                <p>موجودی کم</p>
+                <h2>{{ qty.count|default:"0" }}</h2>
+                <small>محصولات نیازمند تأمین</small>
+            </div>
+
+            <div class="stat-card">
+                <div class="stat-icon purple">👥</div>
+                <p>تعداد کاربران</p>
+                <h2>{{ total_users|default:"0" }}</h2>
+                <small>کاربران سیستم</small>
+            </div>
+
+        </section>
+
+
+        <!-- Charts -->
+        <section class="content-grid">
+
+            <!-- Sales Chart -->
+            <div class="panel chart-panel">
+
+                <div class="panel-header">
+
+                    <div>
+                        <h3>آمار فروش</h3>
+                        <p>نمودار فروش روزانه</p>
+                    </div>
+
+                    <div class="chart-filter">
+                        <select id="chartPeriod">
+                            <option value="7">۷ روز اخیر</option>
+                            <option value="30">۳۰ روز اخیر</option>
+                            <option value="90">۹۰ روز اخیر</option>
+                        </select>
+                    </div>
+
+                </div>
+
+
+                <div class="chart-summary">
+
+                    <div>
+                        <span>مجموع فروش</span>
+                        <h2 id="totalSales">۰ تومان</h2>
+                    </div>
+
+                    <div class="chart-status">
+                        <span class="status-dot"></span>
+                        <span>آمار فروش روزانه</span>
+                    </div>
+
+                </div>
+
+
+                <div class="chart-container">
+                    <canvas id="salesChart"></canvas>
+                </div>
+
+            </div>
+
+
+            <!-- Inventory -->
+            <div class="panel inventory-panel">
+
+                <div class="panel-header">
+
+                    <div>
+                        <h3>وضعیت انبار</h3>
+                        <p>موجودی محصولات</p>
+                    </div>
+
+                </div>
+
+                <div class="inventory-stat">
+                    <span>موجودی مناسب</span>
+                    <strong>10</strong>
+                </div>
+
+                <div class="inventory-stat">
+                    <span>موجودی کم</span>
+                    <strong>5</strong>
+                </div>
+
+                <div class="inventory-stat">
+                    <span>ناموجود</span>
+                    <strong>{{ out_of_stock|default:"0" }}</strong>
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- Recent Products -->
+        <section class="panel products-panel">
+
+            <div class="panel-header">
+
+                <div>
+                    <h3>محصولات اخیر</h3>
+                    <p>آخرین محصولات ثبت‌شده در سیستم</p>
+                </div>
+
+                <a href="#" class="view-all">مشاهده همه</a>
+
+            </div>
+
+
+            <div class="table-wrapper">
+
+                <table>
+
+                    <thead>
+                        <tr>
+                            <th>نام محصول</th>
+                            <th>دسته‌بندی</th>
+                            <th>قیمت خرید</th>
+                            <th>موجودی</th>
+                            <th>وضعیت</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+
+                        {% for product in recent_products %}
+
+                        <tr>
+
+                            <td>{{ product.name }}</td>
+
+                            <td>{{ product.category }}</td>
+
+                            <td>{{ product.buy_price|intcomma }}</td>
+
+                            <td>{{ product.quantity }}</td>
+
+                            <td>
+
+                                {% if product.quantity == 0 %}
+                                    <span class="badge danger">ناموجود</span>
+
+                                {% elif product.quantity <= 5 %}
+                                    <span class="badge warning">موجودی کم</span>
+
+                                {% else %}
+                                    <span class="badge success">موجود</span>
+                                {% endif %}
+
+                            </td>
+
+                        </tr>
+
+                        {% empty %}
+
+                        <tr>
+                            <td colspan="5" class="empty">
+                                هنوز محصولی ثبت نشده است.
+                            </td>
+                        </tr>
+
+                        {% endfor %}
+
+                    </tbody>
+
+                </table>
+
+            </div>
+
+        </section>
+
+    </main>
+
+</div>
+
+
+<!-- Django data for Chart.js -->
+{{ sales_chart|json_script:"sales-data" }}
+
+
+<!-- Sales Chart Script -->
+<script>
+
+function getCookie(name) {
+    let cookieValue = null;
+
+    if (document.cookie && document.cookie !== '') {
+        const cookies = document.cookie.split(';');
+
+        for (let cookie of cookies) {
+            cookie = cookie.trim();
+
+            if (cookie.startsWith(name + '=')) {
+                cookieValue = decodeURIComponent(
+                    cookie.substring(name.length + 1)
+                );
+                break;
+            }
+        }
+    }
+
+    return cookieValue;
+}
+
+function dailyStockCheck() {
+
+    const lastCheck = localStorage.getItem('last_stock_check');
+    const today = new Date().toLocaleDateString('en-CA');
+
+    if (lastCheck === today) {
+       return;
+   }
+
+    fetch("{% url 'home:daily_stock_check' %}", {
+        method: "POST",
+        headers: {
+            "X-CSRFToken": getCookie('csrftoken'),
+            "Content-Type": "application/json"
+        }
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error("Request failed");
+        }
+
+        return response.json();
+    })
+    .then(data => {
+        if (data.status === "success") {
+            localStorage.setItem('last_stock_check', today);
+            console.log("Daily stock check completed");
+        }
+    })
+    .catch(error => {
+        console.error("Stock check error:", error);
+    });
+}
+
+document.addEventListener('DOMContentLoaded', function () {
+
+    const dataElement = document.getElementById('sales-data');
+    const canvas = document.getElementById('salesChart');
+
+    if (!dataElement || !canvas) {
+        console.error('Sales chart elements not found!');
+        return;
+    }
+
+    const salesData = JSON.parse(dataElement.textContent);
+
+    const labels = salesData.map(item => item.created_at);
+
+    const values = salesData.map(item => Number(item.total || 0));
+
+    console.log('Sales labels:', labels);
+    console.log('Sales values:', values);
+
+
+    // Create Chart
+    const salesChart = new Chart(canvas, {
+
+        type: 'line',
+
+        data: {
+
+            labels: labels,
+
+            datasets: [{
+
+                label: 'مبلغ فروش',
+
+                data: values,
+
+                borderColor: '#38bdf8',
+
+                backgroundColor: 'rgba(56, 189, 248, 0.12)',
+
+                borderWidth: 3,
+
+                fill: true,
+
+                tension: 0.4,
+
+                pointRadius: 4,
+
+                pointBackgroundColor: '#38bdf8',
+
+                pointBorderColor: '#1e293b',
+
+                pointBorderWidth: 2
+
+            }]
+
+        },
+
+        options: {
+
+            responsive: true,
+
+            maintainAspectRatio: false,
+
+            plugins: {
+
+                legend: {
+                    display: false
+                },
+
+                tooltip: {
+
+                    rtl: true,
+
+                    callbacks: {
+
+                        label: function(context) {
+
+                            return context.parsed.y
+                                .toLocaleString('fa-IR') + ' تومان';
+
+                        }
+
+                    }
+
+                }
+
+            },
+
+            scales: {
+
+                x: {
+
+                    grid: {
+                        display: false
+                    },
+
+                    ticks: {
+                        color: '#94a3b8'
+                    }
+
+                },
+
+                y: {
+
+                    beginAtZero: true,
+
+                    grid: {
+                        color: 'rgba(148, 163, 184, 0.12)'
+                    },
+
+                    ticks: {
+
+                        color: '#94a3b8',
+
+                        callback: function(value) {
+
+                            return value.toLocaleString('fa-IR');
+
+                        }
+
+                    }
+
+                }
+
+            }
+
+        }
+
+    });
+
+
+    // Calculate total sales
+    const total = values.reduce((sum, value) => sum + value, 0);
+
+    document.getElementById('totalSales').textContent =
+        total.toLocaleString('fa-IR') + ' تومان';
+
+
+    // Period filter
+    const periodSelect = document.getElementById('chartPeriod');
+
+    periodSelect.addEventListener('change', function () {
+
+        const days = Number(this.value);
+
+        const filteredData = salesData.slice(-days);
+
+        salesChart.data.labels = filteredData.map(item => item.created_at);
+
+        salesChart.data.datasets[0].data =
+            filteredData.map(item => Number(item.total || 0));
+
+        salesChart.update();
+
+        const filteredTotal = filteredData.reduce(
+            (sum, item) => sum + Number(item.total || 0),
+            0
+        );
+
+        document.getElementById('totalSales').textContent =
+            filteredTotal.toLocaleString('fa-IR') + ' تومان';
+
+    });
+
+});
+
+</script>
+
+</body>
+</html>

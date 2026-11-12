@@ -1,0 +1,102 @@
+
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ورود | StockMaster</title>
+    <link rel="stylesheet" href="{% static 'css/auth.css' %}">
+</head>
+<body>
+
+<div class="auth-wrapper">
+
+    <div class="auth-brand">
+        <div class="brand-icon">S</div>
+        <h1>StockMaster</h1>
+        <p>مدیریت هوشمند فروش و انبارداری</p>
+    </div>
+
+    <div class="auth-card">
+
+        <div class="card-heading">
+            <h2>خوش برگشتی!</h2>
+            <p>برای ورود به پنل مدیریت اطلاعاتت رو وارد کن.</p>
+        </div>
+
+        {% if messages %}
+            {% for message in messages %}
+                <div class="alert {{ message.tags }}">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        {% endif %}
+
+        <form method="POST">
+            {% csrf_token %}
+
+            <div class="form-group">
+                <label for="{{ form.username.id_for_label }}">نام کاربری</label>
+                {{ form.username }}
+                {% for error in form.username.errors %}
+                    <small class="error">{{ error }}</small>
+                {% endfor %}
+            </div>
+
+            <div class="form-group">
+                <label for="{{ form.password.id_for_label }}">رمز عبور</label>
+
+                <div class="password-wrapper">
+                    {{ form.password }}
+                    <button type="button" class="toggle-password">نمایش</button>
+                </div>
+
+                {% for error in form.password.errors %}
+                    <small class="error">{{ error }}</small>
+                {% endfor %}
+            </div>
+
+            {% for error in form.non_field_errors %}
+                <div class="alert error-alert">{{ error }}</div>
+            {% endfor %}
+
+            <div class="forgot-password">
+                <a href="{% url 'accounts:password_reset' %}">
+                     رمز عبورت رو فراموش کردی؟
+                </a>
+            </div>
+
+            <button type="submit" class="submit-btn">
+                ورود به حساب
+            </button>
+        </form>
+
+        <div class="auth-footer">
+            هنوز حساب کاربری نداری؟
+            <a href="{% url 'accounts:register' %}">ثبت‌نام کن</a>
+        </div>
+
+    </div>
+
+    <div class="auth-bottom">
+        © 2026 StockMaster | تمام حقوق محفوظ است
+    </div>
+
+</div>
+
+<script>
+document.querySelectorAll('.toggle-password').forEach(button => {
+    button.addEventListener('click', () => {
+        const input = button.parentElement.querySelector('input');
+        const isPassword = input.type === 'password';
+
+        input.type = isPassword ? 'text' : 'password';
+        button.textContent = isPassword ? 'مخفی' : 'نمایش';
+    });
+});
+</script>
+
+</body>
+</html>

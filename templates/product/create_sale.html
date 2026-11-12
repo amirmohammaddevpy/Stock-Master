@@ -1,0 +1,255 @@
+{% load humanize %}
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <style>
+    #saleForm {
+        background: #151f32 !important;
+        padding: 35px !important;
+        border: 1px solid #35445c !important;
+        border-radius: 20px !important;
+        max-width: 750px !important;
+        margin: 30px auto !important;
+        direction: rtl;
+        box-sizing: border-box;
+    }
+
+    #saleForm .form-group {
+        display: flex !important;
+        flex-direction: column !important;
+        gap: 12px;
+        margin-bottom: 25px;
+    }
+
+    #saleForm label {
+        color: white !important;
+        font-size: 16px;
+        font-weight: bold;
+    }
+
+    #saleForm input,
+    #saleForm select {
+        width: 100% !important;
+        height: 64px !important;
+        padding: 0 15px !important;
+        background: #0b1323 !important;
+        color: white !important;
+        border: 1px solid #35445c !important;
+        border-radius: 12px !important;
+        box-sizing: border-box !important;
+    }
+
+    #saleForm input:focus,
+    #saleForm select:focus {
+        border-color: #0284c7 !important;
+        outline: none !important;
+    }
+
+    #saleForm button {
+        width: 100% !important;
+        height: 64px !important;
+        background: #078bc9 !important;
+        color: white !important;
+        border: none !important;
+        border-radius: 12px !important;
+        font-size: 18px !important;
+        font-weight: bold !important;
+        cursor: pointer;
+    }
+
+    #saleForm button:hover {
+        background: #0077b6 !important;
+    }
+</style>.
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>ثبت فروش | StockMaster</title>
+
+    <link rel="stylesheet" href="{% static 'css/sales.css' %}">
+</head>
+<body>
+
+<div class="dashboard">
+
+    <aside class="sidebar">
+        <div class="logo">Stock<span>Master</span></div>
+
+        <nav>
+            <a href="#" class="active">ثبت فروش</a>
+            <a href="{% url 'product:sales_history' %}">تاریخچه فروش</a>
+        </nav>
+    </aside>
+
+    <main class="main-content">
+
+        <header class="topbar">
+            <div>
+                <h2>ثبت فروش جدید</h2>
+                <p>ثبت تراکنش و به‌روزرسانی موجودی کالا</p>
+            </div>
+
+            <div class="user-info">
+                <span>{{ request.user.username }}</span>
+            </div>
+        </header>
+
+        <section class="sale-container">
+
+            <div class="section-title">
+                <h3>اطلاعات فروش</h3>
+                <span>فیلدهای ستاره‌دار الزامی هستند</span>
+            </div>
+
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="message {{ message.tags }}">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            {% endif %}
+
+
+<form method="POST" id="saleForm">
+    {% csrf_token %}
+
+    <div class="form-group">
+        <label for="product">Product:</label>
+        <select name="product" id="product" required>
+            <option value="">- Select an option -</option>
+
+            {% for product in products %}
+                <option value="{{ product.id }}">
+                    {{ product.name }}
+                </option>
+            {% endfor %}
+        </select>
+    </div>
+
+    <div class="form-group">
+        <label for="quantity">Quantity:</label>
+        <input
+            type="number"
+            name="quantity"
+            id="quantity"
+            value="1"
+            min="1"
+            required
+        >
+    </div>
+
+    <div class="form-group">
+        <label for="unit_price">Unit price:</label>
+        <input
+            type="text"
+            id="unit_price"
+            readonly
+        >
+        <input
+            type="hidden"
+            name="unit_price"
+            id="unit_price_value"
+        >
+    </div>
+
+    <div class="form-group">
+        <label for="total_price">Total price:</label>
+        <input
+            type="text"
+            id="total_price"
+            readonly
+        >
+        <input
+            type="hidden"
+            name="total_price"
+            id="total_price_value"
+        >
+    </div>
+
+    <button type="submit" id="submitBtn">
+        ثبت فروش
+    </button>
+</form>
+
+<script>
+    const productSelect = document.getElementById("product");
+    const quantityInput = document.getElementById("quantity");
+
+    const unitPriceInput = document.getElementById("unit_price");
+    const unitPriceValue = document.getElementById("unit_price_value");
+
+    const totalPriceInput = document.getElementById("total_price");
+    const totalPriceValue = document.getElementById("total_price_value");
+
+    let currentUnitPrice = 0;
+
+    const formatPrice = (price) => {
+        return Number(price).toLocaleString("en-US");
+    };
+
+    // دریافت قیمت محصول از سرور
+    productSelect.addEventListener("change", async function () {
+
+        const productId = this.value;
+
+        currentUnitPrice = 0;
+
+        unitPriceInput.value = "";
+        unitPriceValue.value = "";
+
+        totalPriceInput.value = "";
+        totalPriceValue.value = "";
+
+        if (!productId) return;
+
+        try {
+            const response = await fetch(
+                `/product/${productId}/price/`
+            );
+
+            if (!response.ok) {
+                throw new Error("خطا در دریافت قیمت");
+            }
+
+            const data = await response.json();
+
+            currentUnitPrice = Number(data.unit_price);
+
+            unitPriceInput.value = formatPrice(currentUnitPrice);
+            unitPriceValue.value = currentUnitPrice;
+
+            calculateTotal();
+
+        } catch (error) {
+            console.error(error);
+            alert("دریافت قیمت محصول با مشکل مواجه شد");
+        }
+    });
+
+    // محاسبه قیمت کل
+    function calculateTotal() {
+
+        const quantity = Number(quantityInput.value);
+
+        if (quantity < 1 || !currentUnitPrice) {
+            totalPriceInput.value = "";
+            totalPriceValue.value = "";
+            return;
+        }
+
+        const total = currentUnitPrice * quantity;
+
+        totalPriceInput.value = formatPrice(total);
+        totalPriceValue.value = total;
+    }
+
+    // با تغییر تعداد، قیمت کل تغییر می‌کند
+    quantityInput.addEventListener("input", calculateTotal);
+
+</script>
+
+
+</body>
+</html>

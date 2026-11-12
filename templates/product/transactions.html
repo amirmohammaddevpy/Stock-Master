@@ -1,0 +1,252 @@
+
+{% load static %}
+{% load humanize %}
+
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>ثبت ورود کالا | استوک مستر</title>
+
+    <link rel="stylesheet" href="{% static 'css/transactions.css' %}">
+</head>
+
+<body>
+
+<main class="transactions-page">
+
+    <header class="page-header">
+        <div>
+            <h1>ثبت ورود کالا</h1>
+            <p>افزودن محصول جدید به انبار استوک مستر</p>
+        </div>
+
+        <a href="{% url 'home:home' %}" class="back-btn">
+            بازگشت به داشبورد
+        </a>
+    </header>
+
+    <section class="transaction-card">
+
+        <div class="card-heading">
+            <span class="icon">↓</span>
+
+            <div>
+                <h2>اطلاعات محصول</h2>
+                <p>مشخصات محصول موردنظر را وارد کنید.</p>
+            </div>
+        </div>
+
+        {% if messages %}
+            {% for message in messages %}
+                <div class="message {{ message.tags }}">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        {% endif %}
+
+        <form method="POST" novalidate>
+            {% csrf_token %}
+
+            {% if form.non_field_errors %}
+                <div class="message error">
+                    {{ form.non_field_errors }}
+                </div>
+            {% endif %}
+
+            <div class="form-grid">
+
+                {% for field in form %}
+
+                    <div class="form-group {% if field.name == 'description' %}full-width{% endif %}">
+
+                        <label for="{{ field.id_for_label }}">
+                            {{ field.label }}
+                        </label>
+
+                        {% if field.name == "category" %}
+
+                            <div class="category-select">
+                                {{ field }}
+
+                                <button
+                                    type="button"
+                                    class="add-category-btn"
+                                    onclick="openCategoryModal()"
+                                >
+                                    + افزودن دسته‌بندی
+                                </button>
+                            </div>
+
+                        {% else %}
+
+                            {{ field }}
+
+                        {% endif %}
+
+                        {% for error in field.errors %}
+                            <small class="field-error">
+                                {{ error }}
+                            </small>
+                        {% endfor %}
+
+                    </div>
+
+                {% endfor %}
+
+            </div>
+
+            <button type="submit" class="submit-btn">
+                ثبت ورود کالا
+            </button>
+
+        </form>
+
+    </section>
+
+</main>
+
+
+<!-- Category Modal -->
+
+<div class="modal-overlay" id="categoryModal">
+
+    <div class="category-modal">
+
+        <button
+            type="button"
+            class="close-modal"
+            onclick="closeCategoryModal()"
+        >
+            &times;
+        </button>
+
+        <h2>افزودن دسته‌بندی جدید</h2>
+
+        <p>نام دسته‌بندی جدید را وارد کنید.</p>
+
+        <form id="categoryForm">
+
+            {% csrf_token %}
+            {{ form_category.as_p }}
+
+            <p id="categoryError" class="field-error"></p>
+
+            <button type="submit" class="submit-btn">
+                ثبت دسته‌بندی
+            </button>
+
+        </form>
+
+    </div>
+
+</div>
+
+
+<script>
+
+    const modal = document.getElementById("categoryModal");
+    const categoryForm = document.getElementById("categoryForm");
+    const categorySelect = document.getElementById("id_category");
+    const categoryError = document.getElementById("categoryError");
+
+    function openCategoryModal() {
+        modal.classList.add("active");
+        categoryError.textContent = "";
+        document.getElementById("categoryName").focus();
+    }
+
+    function closeCategoryModal() {
+        modal.classList.remove("active");
+    }
+
+    modal.addEventListener("click", function(event) {
+        if (event.target === modal) {
+            closeCategoryModal();
+        }
+    });
+
+    categoryForm.addEventListener("submit", async function(event) {
+
+        event.preventDefault();
+
+        const formData = new FormData(categoryForm);
+
+        categoryError.textContent = "";
+
+        try {
+
+            const response = await fetch(
+                "{% url 'product:category_create' %}",
+                {
+                    method: "POST",
+                    body: formData,
+                    headers: {
+                        "X-Requested-With": "XMLHttpRequest"
+                    }
+                }
+            );
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                categoryError.textContent =
+                    data.error || "خطا در ثبت دسته‌بندی";
+                return;
+            }
+
+            const option = document.createElement("option");
+
+            option.value = data.id;
+            option.textContent = data.name;
+
+            categorySelect.appendChild(option);
+            categorySelect.value = data.id;
+
+            categoryForm.reset();
+            closeCategoryModal();
+
+        } catch (error) {
+
+            categoryError.textContent =
+                "ارتباط با سرور برقرار نشد.";
+
+        }
+
+    });
+// جداکننده سه‌رقمی برای فیلدهای قیمت
+const priceInputs = [
+    document.getElementById("id_buy_price"),
+    document.getElementById("id_sell_price")
+];
+
+priceInputs.forEach(input => {
+    if (!input) return;
+
+    input.type = "text";
+    input.inputMode = "numeric";
+
+    input.addEventListener("input", function () {
+        let value = this.value.replace(/,/g, "");
+
+        if (!/^\d*$/.test(value)) return;
+
+        this.value = value.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+    });
+});
+
+document.querySelector("form").addEventListener("submit", function () {
+    priceInputs.forEach(input => {
+        if (input) {
+            input.value = input.value.replace(/,/g, "");
+        }
+    });
+});
+
+</script>
+
+</body>
+</html>

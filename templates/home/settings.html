@@ -1,0 +1,310 @@
+
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>تنظیمات | StockMaster</title>
+    <link rel="stylesheet" href="{% static 'css/setting.css' %}">
+    <link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+
+<body>
+
+<div class="dashboard">
+
+    <!-- Sidebar -->
+    <aside class="sidebar">
+
+        <div class="brand">
+            <div class="brand-icon">S</div>
+            <div>
+                <h2>StockMaster</h2>
+                <span>مدیریت هوشمند انبار</span>
+            </div>
+        </div>
+
+        <div class="sidebar-menu">
+            <span class="menu-title">منوی اصلی</span>
+
+            <a href="{% url 'home:home' %}" class="menu-item">
+                <span>▦</span>
+                داشبورد
+            </a>
+
+            <a href="" class="menu-item">
+                <span>▤</span>
+                محصولات
+            </a>
+
+            <a href="" class="menu-item">
+                <span>▧</span>
+                دسته‌بندی‌ها
+            </a>
+
+            <a href="#" class="menu-item">
+                <span>⇄</span>
+                تراکنش‌ها
+            </a>
+
+            <a href="#" class="menu-item">
+                <span>▥</span>
+                فروش
+            </a>
+
+            <a href="" class="menu-item">
+                <span>▨</span>
+                گزارش‌ها
+            </a>
+
+            <span class="menu-title second-title">سیستم</span>
+
+            <a href="#" class="menu-item active">
+                <span>⚙</span>
+                تنظیمات
+            </a>
+
+        </div>
+
+        <div class="sidebar-footer">
+            <div class="user-avatar">
+                {{ request.user.username|first|upper }}
+            </div>
+
+            <div class="user-info">
+                <strong>{{ request.user.get_full_name|default:request.user.username }}</strong>
+                <span>مدیر سیستم</span>
+            </div>
+        </div>
+
+    </aside>
+
+
+    <!-- Main Content -->
+    <main class="main-content">
+
+        <header class="topbar">
+            <div>
+                <h1>تنظیمات</h1>
+                <p>مدیریت تنظیمات حساب کاربری و سیستم</p>
+            </div>
+
+            <div class="topbar-user">
+                <span class="status-dot"></span>
+                <span>{{ request.user.username }}</span>
+            </div>
+        </header>
+
+
+        <!-- Settings Content -->
+        <form method="POST" class="settings-form">
+            {% csrf_token %}
+
+            <div class="settings-header">
+                <div>
+                    <h2>تنظیمات سیستم</h2>
+                    <p>اطلاعات و ترجیحات حساب خود را مدیریت کنید.</p>
+                </div>
+
+                <button type="submit" class="save-btn">
+                    ذخیره تغییرات
+                </button>
+            </div>
+
+
+            <!-- Account Settings -->
+            <section class="settings-card">
+
+                <div class="card-heading">
+                    <div class="heading-icon account-icon">♙</div>
+                    <div>
+                        <h3>اطلاعات حساب کاربری</h3>
+                        <p>اطلاعات شخصی حساب خود را مدیریت کنید.</p>
+                    </div>
+                </div>
+
+                <div class="form-grid">
+
+                    <div class="form-group">
+                        <label for="first_name">نام</label>
+                        <input
+                            type="text"
+                            id="first_name"
+                            name="first_name"
+                            value="{{ request.user.first_name }}"
+                            placeholder="نام خود را وارد کنید"
+                        >
+                    </div>
+
+                    <div class="form-group">
+                        <label for="last_name">نام خانوادگی</label>
+                        <input
+                            type="text"
+                            id="last_name"
+                            name="last_name"
+                            value="{{ request.user.last_name }}"
+                            placeholder="نام خانوادگی خود را وارد کنید"
+                        >
+                    </div>
+
+                    <div class="form-group full-width">
+                        <label for="email">ایمیل</label>
+                        <input
+                            type="email"
+                            id="email"
+                            name="email"
+                            value="{{ request.user.email }}"
+                            placeholder="example@gmail.com"
+                        >
+                    </div>
+
+                </div>
+
+            </section>
+
+
+            <!-- Inventory Settings -->
+            <section class="settings-card">
+
+                <div class="card-heading">
+                    <div class="heading-icon inventory-icon">▤</div>
+                    <div>
+                        <h3>تنظیمات انبار</h3>
+                        <p>محدوده هشدار و کنترل موجودی محصولات.</p>
+                    </div>
+                </div>
+
+                <div class="form-grid">
+
+                    <div class="form-group">
+                        <label for="low_stock_threshold">
+                            حداقل موجودی هشدار
+                        </label>
+
+                        <input
+                            type="number"
+                            id="low_stock_threshold"
+                            name="low_stock_threshold"
+                            min="0"
+                            value="{{ user_settings.low_stock_threshold|default:5 }}"
+                        >
+
+                        <small>وقتی موجودی محصول به این عدد یا کمتر برسد، هشدار نمایش داده می‌شود.</small>
+                    </div>
+
+                    <div class="form-group toggle-group">
+                        <div>
+                            <label>هشدار کمبود موجودی</label>
+                            <small>نمایش هشدار برای محصولات کم‌موجودی</small>
+                        </div>
+
+                        <label class="switch">
+                            <input
+                                type="checkbox"
+                                name="low_stock_alert"
+                                {% if user_settings.low_stock_alert %}checked{% endif %}
+                            >
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+
+                </div>
+
+            </section>
+
+
+            <!-- Appearance Settings -->
+            <section class="settings-card">
+
+                <div class="card-heading">
+                    <div class="heading-icon appearance-icon">◐</div>
+                    <div>
+                        <h3>تنظیمات ظاهری</h3>
+                        <p>شخصی‌سازی ظاهر پنل مدیریت.</p>
+                    </div>
+                </div>
+
+                <div class="form-grid">
+
+                    <div class="form-group toggle-group">
+                        <div>
+                            <label>حالت تاریک</label>
+                            <small>استفاده از پوسته تاریک سیستم</small>
+                        </div>
+
+                        <label class="switch">
+                            <input
+                                type="checkbox"
+                                name="dark_mode"
+                                {% if user_settings.dark_mode %}checked{% endif %}
+                            >
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="language">زبان سیستم</label>
+
+                        <select id="language" name="language">
+                            <option value="fa" selected>فارسی</option>
+                            <option value="en">English</option>
+                        </select>
+                    </div>
+
+                </div>
+
+            </section>
+
+
+            <!-- Security Settings -->
+            <section class="settings-card">
+
+                <div class="card-heading">
+                    <div class="heading-icon security-icon">♧</div>
+                    <div>
+                        <h3>امنیت حساب</h3>
+                        <p>مدیریت امنیت و دسترسی حساب کاربری.</p>
+                    </div>
+                </div>
+
+                <div class="security-row">
+                    <div>
+                        <strong>تغییر رمز عبور</strong>
+                        <p>برای تغییر رمز عبور به صفحه مربوطه بروید.</p>
+                    </div>
+
+                    <a href="" class="secondary-btn">
+                        تغییر رمز عبور
+                    </a>
+                </div>
+
+                <div class="security-row">
+                    <div>
+                        <strong>خروج از حساب کاربری</strong>
+                        <p>از حساب خود در این دستگاه خارج شوید.</p>
+                    </div>
+
+                    <a href="" class="logout-btn">
+                        خروج از حساب
+                    </a>
+                </div>
+
+            </section>
+
+
+            <div class="bottom-actions">
+                <button type="submit" class="save-btn">
+                    ذخیره تنظیمات
+                </button>
+            </div>
+
+        </form>
+
+    </main>
+
+</div>
+
+</body>
+</html>
